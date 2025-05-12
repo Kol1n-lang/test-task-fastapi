@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+*$py.class
+
+pip-log.txt
+pip-delete-this-directory.txt
+
+target/
+
+.env
+.venv
+
+.vscode/
+.idea/
+
+dump.rdb
