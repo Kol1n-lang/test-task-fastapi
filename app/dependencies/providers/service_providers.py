@@ -9,7 +9,8 @@ from app.core.schemas.service_protocols import (
     GetBillsServiceProtocol,
     GetBillServiceProtocol,
     GetCurrenciesServiceProtocol,
-    PaymentServiceProtocol, CachedBillsServiceProtocol,
+    PaymentServiceProtocol,
+    CachedBillsServiceProtocol,
 )
 from app.services import (
     RegisterUserService,
@@ -19,7 +20,8 @@ from app.services import (
     GetCurrenciesService,
     GetBillsService,
     GetBillService,
-    PaymentService, CachedBillsService,
+    PaymentService,
+    CachedBillsService,
 )
 
 

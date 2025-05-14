@@ -1,4 +1,5 @@
 from app.core.configs import all_settings
+from app.core.custom_exceptions import InvalidTokenError
 from app.core.schemas.repo_protocols import AuthRepoProtocol
 from datetime import datetime, timedelta, timezone
 from jose import jwt
@@ -37,7 +38,9 @@ class JWTService:
             "algorithm": all_settings.jwt.algorithm,
         }
 
-    def get_info_from_token(self, token: str) -> dict:
+    def get_info_from_token(self, token: str | None) -> dict:
+        if token is None:
+            raise InvalidTokenError
         token = token.split(" ", 1)[1]
         token_payload: dict = jwt.decode(
             token, all_settings.jwt.secret_key, algorithms=all_settings.jwt.algorithm

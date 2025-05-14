@@ -10,6 +10,7 @@ from app.core.schemas.service_protocols.jwt_service_repo_protocols import (
 )
 from app.core.configs import all_settings
 
+
 class CreateBillService:
 
     def __init__(
@@ -23,7 +24,7 @@ class CreateBillService:
         user_data = self._jwt_service.get_info_from_token(token)
         username = user_data["username"]
         email = user_data["email"]
-        user_id = await self._bill_repo.get_user_id(username, email)
+        user_id = await self._bill_repo.get_user_id(email, username)
         res = await self._bill_repo.create_bill(user_id)
         return res
 
@@ -45,7 +46,7 @@ class GetBillsService:
         user_data = self._jwt_service.get_info_from_token(token)
         username = user_data["username"]
         email = user_data["email"]
-        user_id = await self._bill_repo.get_user_id(username, email)
+        user_id = await self._bill_repo.get_user_id(email, username)
         cached_bills = await self._cached_service(user_id)
         if cached_bills:
             return cached_bills
@@ -80,14 +81,16 @@ class PaymentService:
     async def __call__(self, bill_id: UUID4, amount: float) -> GetBill:
         res = await self._bill_repo.payment(bill_id, amount)
         await self._bill_repo.create_transaction(bill_id, amount)
-        res = GetBill.model_validate(res)
         await self.__publish_message_transaction(str(res.user.email), amount)
-        return  res
+        print(str(res.user.email))
+        return GetBill.model_validate(res)
 
-    async def __publish_message_transaction(self, user_email: str, amount: float) -> None:
+    async def __publish_message_transaction(
+        self, user_email: str, amount: float
+    ) -> None:
         async with RabbitBroker(all_settings.rabbit.rabbit_url) as broker:
-            data ={
+            data = {
                 "user_email": user_email,
                 "amount": amount,
             }
-            await broker.publish(data, queue="bank-transactions")
+            await broker.publish(data, queue="bank-transactions") # type: ignore

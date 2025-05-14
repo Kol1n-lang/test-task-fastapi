@@ -56,12 +56,11 @@ class GetCurrenciesService:
             usd, eur = await asyncio.gather(
                 self.redis.get("usd"), self.redis.get("eur")
             )
-
+            usd, eur = "dasdas", "dasdsa"
             if not all([usd, eur]):
                 usd_data, eur_data = await asyncio.gather(
                     self.__fetch_rate("USD"), self.__fetch_rate("EUR")
                 )
-
                 parsed_usd = self.__parsing(usd_data)
                 parsed_eur = self.__parsing(eur_data)
 
@@ -73,7 +72,6 @@ class GetCurrenciesService:
                 )
 
                 return {"usd": parsed_usd, "eur": parsed_eur}
-
             return {"usd": usd, "eur": eur}
         except redis.RedisError as e:
             raise HTTPException(status_code=500, detail=f"Redis error: {str(e)}")
@@ -92,11 +90,11 @@ class CachedBillsService:
             decode_responses=True,
         )
 
-    async def __call__(self, user_id: UUID4) -> True | False:
+    async def __call__(self, user_id: UUID4) -> list[GetBill] | None:
 
         cached_bills = await self.redis.hgetall(str(user_id))
         if not cached_bills:
-            return False
+            return None
         return [
             GetBill.model_validate_json(bill_data)
             for bill_data in cached_bills.values()
@@ -106,9 +104,6 @@ class CachedBillsService:
         pass
 
     async def caching(self, user_id: UUID4, user_bills: list[GetBill]) -> None:
-        bills_data = {
-            str(bill.uuid): bill.model_dump_json()
-            for bill in user_bills
-        }
+        bills_data = {str(bill.uuid): bill.model_dump_json() for bill in user_bills}
         await self.redis.hset(str(user_id), mapping=bills_data)
-        await self.redis.expire(str(user_id), 15)
+        await self.redis.expire(str(user_id), 10)

@@ -52,7 +52,11 @@ class JWTAccessMiddleware(BaseHTTPMiddleware):
             raise InvalidTokenError
 
         current_time = datetime.now(timezone.utc).timestamp()
-        if current_time > token_payload.get("exp"):
+        token_life = token_payload.get("exp")
+        if token_life is None:
+            raise InvalidTokenError
+
+        if current_time > token_life:
             raise JWTIsFiredError
 
         return await call_next(request)
