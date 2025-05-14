@@ -6,7 +6,7 @@ from .bank_service_protocol import (
     PaymentServiceProtocol,
 )
 from .jwt_service_repo_protocols import JWTServiceProtocol
-from .cached_service import GetCurrenciesServiceProtocol
+from .cached_service import GetCurrenciesServiceProtocol, CachedBillsServiceProtocol
 
 __all__ = [
     "RegisterUserServiceProtocol",
@@ -18,4 +18,5 @@ __all__ = [
     "GetBillServiceProtocol",
     "GetCurrenciesServiceProtocol",
     "PaymentServiceProtocol",
+    "CachedBillsServiceProtocol"
 ]

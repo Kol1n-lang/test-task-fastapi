@@ -6,7 +6,7 @@ from .bank_services import (
     GetBillService,
     GetBillsService,
 )
-from .cached_service import GetCurrenciesService
+from .cached_service import GetCurrenciesService, CachedBillsService
 
 __all__ = [
     "RegisterUserService",
@@ -17,4 +17,5 @@ __all__ = [
     "PaymentService",
     "GetBillService",
     "GetBillsService",
+    "CachedBillsService"
 ]
