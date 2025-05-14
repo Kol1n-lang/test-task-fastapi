@@ -1,5 +1,9 @@
 from typing import Protocol, Any, Optional
 
+from pydantic.v1 import UUID4
+
+from app.core.models.pydantic_models import GetBill
+
 
 class GetCurrenciesServiceProtocol(Protocol):
 
@@ -21,4 +25,17 @@ class GetCurrenciesServiceProtocol(Protocol):
 
     def __parsing(self, data: dict[str, Any]) -> Optional[str]:
         """Parse data"""
+        pass
+class CachedBillsServiceProtocol(Protocol):
+
+    async def __call__(self, user_id: UUID4) -> True | False:
+        """Check cached bills"""
+        pass
+
+    async def take_cache(self, user_id: UUID4):
+        """Get cached bills"""
+        pass
+
+    async def caching(self, user_id: UUID4, user_bills: list[GetBill]) -> None:
+        """Caching bills"""
         pass

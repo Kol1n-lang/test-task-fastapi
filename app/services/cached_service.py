@@ -3,8 +3,10 @@ import httpx
 import redis.asyncio as redis
 from typing import Dict, Any, Optional
 from fastapi import HTTPException
+from pydantic import UUID4
 
 from app.core.configs import all_settings
+from app.core.models.pydantic_models import GetBill
 
 
 class GetCurrenciesService:
@@ -78,3 +80,35 @@ class GetCurrenciesService:
 
     async def __call__(self) -> dict:
         return await self.__caching()
+
+
+class CachedBillsService:
+
+    def __init__(self):
+        self.redis = redis.Redis(
+            host=all_settings.redis.host,
+            port=all_settings.redis.port,
+            db=all_settings.redis.db,
+            decode_responses=True,
+        )
+
+    async def __call__(self, user_id: UUID4) -> True | False:
+
+        cached_bills = await self.redis.hgetall(str(user_id))
+        if not cached_bills:
+            return False
+        return [
+            GetBill.model_validate_json(bill_data)
+            for bill_data in cached_bills.values()
+        ]
+
+    async def take_cache(self, user_id: UUID4):
+        pass
+
+    async def caching(self, user_id: UUID4, user_bills: list[GetBill]) -> None:
+        bills_data = {
+            str(bill.uuid): bill.model_dump_json()
+            for bill in user_bills
+        }
+        await self.redis.hset(str(user_id), mapping=bills_data)
+        await self.redis.expire(str(user_id), 15)

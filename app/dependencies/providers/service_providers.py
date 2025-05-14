@@ -9,7 +9,7 @@ from app.core.schemas.service_protocols import (
     GetBillsServiceProtocol,
     GetBillServiceProtocol,
     GetCurrenciesServiceProtocol,
-    PaymentServiceProtocol,
+    PaymentServiceProtocol, CachedBillsServiceProtocol,
 )
 from app.services import (
     RegisterUserService,
@@ -19,7 +19,7 @@ from app.services import (
     GetCurrenciesService,
     GetBillsService,
     GetBillService,
-    PaymentService,
+    PaymentService, CachedBillsService,
 )
 
 
@@ -56,11 +56,12 @@ class ServiceProvider(Provider):
         self,
         bill_repo: BankRepoProtocol,
         jwt_service: JWTServiceProtocol,
+        cached_service: CachedBillsServiceProtocol,
     ) -> GetBillsServiceProtocol:
-        return GetBillsService(bill_repo, jwt_service)
+        return GetBillsService(bill_repo, jwt_service, cached_service)
 
     @provide(scope=Scope.REQUEST)
-    async def get_bills_service(
+    async def get_bill_service(
         self,
         bill_repo: BankRepoProtocol,
     ) -> GetBillServiceProtocol:
@@ -76,3 +77,9 @@ class ServiceProvider(Provider):
         bill_repo: BankRepoProtocol,
     ) -> PaymentServiceProtocol:
         return PaymentService(bill_repo)
+
+    @provide(scope=Scope.REQUEST)
+    async def get_caching_service(
+        self,
+    ) -> CachedBillsServiceProtocol:
+        return CachedBillsService()
