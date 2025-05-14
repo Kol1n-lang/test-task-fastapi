@@ -37,12 +37,22 @@ class RedisSettings(BaseSettings):
     db: int = Field(alias="REDIS_DB", default=0)
     cache_time: int = Field(alias="REDIS_CACHE_TIME", default=60)
 
+class FastStreamRabbitMQSettings(BaseSettings):
+    host: str = Field(alias="RABBIT_HOST", default="localhost")
+    port: int = Field(alias="RABBIT_PORT", default=5672)
+    login: str = Field(alias="RABBIT_LOGIN", default="guest")
+    password: str = Field(alias="RABBIT_PASSWORD", default="guest")
+
+    @property
+    def rabbit_url(self) -> str:
+        return f"amqp://{self.login}:{self.password}@{self.host}:{self.port}/"
 
 class Settings(BaseSettings):
     database: DatabaseSettings = DatabaseSettings()
     jwt: JWTSettings = JWTSettings()
     external: ExternalSettings = ExternalSettings()
     redis: RedisSettings = RedisSettings()
+    rabbit: FastStreamRabbitMQSettings = FastStreamRabbitMQSettings()
 
     class Config:
         env_file = "../../../.env"
