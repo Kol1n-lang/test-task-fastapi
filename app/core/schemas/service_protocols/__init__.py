@@ -18,5 +18,5 @@ __all__ = [
     "GetBillServiceProtocol",
     "GetCurrenciesServiceProtocol",
     "PaymentServiceProtocol",
-    "CachedBillsServiceProtocol"
+    "CachedBillsServiceProtocol",
 ]

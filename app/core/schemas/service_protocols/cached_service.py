@@ -26,9 +26,11 @@ class GetCurrenciesServiceProtocol(Protocol):
     def __parsing(self, data: dict[str, Any]) -> Optional[str]:
         """Parse data"""
         pass
+
+
 class CachedBillsServiceProtocol(Protocol):
 
-    async def __call__(self, user_id: UUID4) -> True | False:
+    async def __call__(self, user_id: UUID4) -> list[GetBill] | None:
         """Check cached bills"""
         pass
 

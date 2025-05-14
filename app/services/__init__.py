@@ -17,5 +17,5 @@ __all__ = [
     "PaymentService",
     "GetBillService",
     "GetBillsService",
-    "CachedBillsService"
+    "CachedBillsService",
 ]

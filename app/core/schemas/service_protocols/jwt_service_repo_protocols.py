@@ -11,6 +11,6 @@ class JWTServiceProtocol(Protocol):
         """Get auth data"""
         pass
 
-    def get_info_from_token(self, token: str) -> dict:
+    def get_info_from_token(self, token: str | None) -> dict:
         """Get info from token"""
         pass
