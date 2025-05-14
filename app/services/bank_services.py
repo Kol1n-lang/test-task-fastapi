@@ -1,3 +1,4 @@
+from faststream.rabbit import RabbitBroker
 from pydantic import UUID4
 from fastapi import Request
 
@@ -6,7 +7,7 @@ from app.core.schemas.repo_protocols import BankRepoProtocol
 from app.core.schemas.service_protocols.jwt_service_repo_protocols import (
     JWTServiceProtocol,
 )
-
+from app.core.configs import all_settings
 
 class CreateBillService:
 
@@ -72,4 +73,14 @@ class PaymentService:
     async def __call__(self, bill_id: UUID4, amount: float) -> GetBill:
         res = await self._bill_repo.payment(bill_id, amount)
         await self._bill_repo.create_transaction(bill_id, amount)
-        return GetBill.model_validate(res)
+        res = GetBill.model_validate(res)
+        await self.__publish_message_transaction(str(res.user.email), amount)
+        return  res
+
+    async def __publish_message_transaction(self, user_email: str, amount: float) -> None:
+        async with RabbitBroker(all_settings.rabbit.rabbit_url) as broker:
+            data ={
+                "user_email": user_email,
+                "amount": amount,
+            }
+            await broker.publish(data, queue="bank-transactions")
