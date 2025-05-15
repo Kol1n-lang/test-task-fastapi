@@ -93,4 +93,4 @@ class PaymentService:
                 "user_email": user_email,
                 "amount": amount,
             }
-            await broker.publish(data, queue="bank-transactions") # type: ignore
+            await broker.publish(data, queue="bank-transactions")  # type: ignore

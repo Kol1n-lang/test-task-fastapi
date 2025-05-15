@@ -26,9 +26,9 @@ class JWTSettings(BaseSettings):
 
 
 class ExternalSettings(BaseSettings):
-    api_secret_key: str = Field(
-        alias="API_SECRET_KEY", default="your-api-secret-key"
-    )
+    api_secret_key: str = Field(alias="API_SECRET_KEY", default="your-api-secret-key")
+    email_sender: str = Field(alias="EMAIL_SENDER", default="your-email-sender")
+    app_password: str = Field(alias="APP_PASSWORD", default="your-app-password")
 
 
 class RedisSettings(BaseSettings):
@@ -36,6 +36,7 @@ class RedisSettings(BaseSettings):
     port: int = Field(alias="REDIS_PORT", default=6379)
     db: int = Field(alias="REDIS_DB", default=0)
     cache_time: int = Field(alias="REDIS_CACHE_TIME", default=60)
+
 
 class FastStreamRabbitMQSettings(BaseSettings):
     host: str = Field(alias="RABBIT_HOST", default="localhost")
@@ -46,6 +47,7 @@ class FastStreamRabbitMQSettings(BaseSettings):
     @property
     def rabbit_url(self) -> str:
         return f"amqp://{self.login}:{self.password}@{self.host}:{self.port}/"
+
 
 class Settings(BaseSettings):
     database: DatabaseSettings = DatabaseSettings()
