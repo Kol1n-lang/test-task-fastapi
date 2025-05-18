@@ -3,6 +3,7 @@ from pydantic import EmailStr, UUID4
 from sqlalchemy import select, insert, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.custom_exceptions import IncorrectPasswordOrEmailError
 from app.core.models.pydantic_models import RegisterUser
 from app.core.models.sqlalchemy_models import User
 
@@ -15,7 +16,7 @@ class AuthRepo:
         query = (
             insert(User).values(
                 email=new_user.email,
-                password=self._hash_password(new_user.password),
+                password=await self._hash_password(new_user.password),
                 username=new_user.username,
             )
         ).returning(User.id)
@@ -27,17 +28,23 @@ class AuthRepo:
         query_res = (await self._con.execute(query)).scalar_one_or_none()
         return query_res is None
 
-    def _hash_password(self, password: str) -> bytes:
+    async def _hash_password(self, password: str) -> bytes:
         salt = bcrypt.gensalt()
         pwd_bytes: bytes = password.encode()
         return bcrypt.hashpw(pwd_bytes, salt=salt)
 
-    async def check_user(self, email: EmailStr, password: str) -> bool:
-        query = select(User).where(
-            and_(
-                User.email == email,
-                User.password == self._hash_password(password),
-            )
+    async def _check_password(self, password: str, hashed_password: bytes) -> bool:
+        return bcrypt.checkpw(
+            password=password.encode(),
+            hashed_password=hashed_password,
         )
-        query_res = (await self._con.execute(query)).scalar_one_or_none
-        return query_res is None
+
+    async def check_user(self, email: EmailStr, password: str) -> bool:
+        query = select(User.password).where(User.email == email)
+        result = await self._con.execute(query)
+        hashed_password: bytes | None = result.scalar_one_or_none()
+
+        if hashed_password is None:
+            return False
+
+        return self._check_password(password, hashed_password)

@@ -37,3 +37,9 @@ async def login(
     login_user_service: FromDishka[LoginServiceProtocol],
 ) -> dict:
     return await login_user_service(login_user)
+
+@auth_router.get(
+    path="/hello",
+)
+async def hello():
+    return {"hello": "world"}

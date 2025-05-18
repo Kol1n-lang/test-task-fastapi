@@ -66,7 +66,7 @@ async def get_currencies(
 
 
 @bank_router.post(
-    path="payment",
+    path="/payment",
     response_model=GetBill,
 )
 @inject
