@@ -38,6 +38,7 @@ async def login(
 ) -> dict:
     return await login_user_service(login_user)
 
+
 @auth_router.get(
     path="/hello",
 )

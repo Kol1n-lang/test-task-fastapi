@@ -1,9 +1,8 @@
 import bcrypt
 from pydantic import EmailStr, UUID4
-from sqlalchemy import select, insert, and_
+from sqlalchemy import select, insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.custom_exceptions import IncorrectPasswordOrEmailError
 from app.core.models.pydantic_models import RegisterUser
 from app.core.models.sqlalchemy_models import User
 
@@ -47,4 +46,4 @@ class AuthRepo:
         if hashed_password is None:
             return False
 
-        return self._check_password(password, hashed_password)
+        return await self._check_password(password, hashed_password)
