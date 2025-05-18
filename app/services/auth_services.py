@@ -38,7 +38,7 @@ class LoginService:
         check_user = await self._auth_repo.check_user(
             login_user.email, login_user.password
         )
-        if check_user:
+        if not check_user:
             raise IncorrectPasswordOrEmailError
         jwt_tokens = self._jwt_service.create_access_refresh_tokens(
             {"username": login_user.username, "email": login_user.email}
