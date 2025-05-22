@@ -56,7 +56,6 @@ class GetCurrenciesService:
             usd, eur = await asyncio.gather(
                 self.redis.get("usd"), self.redis.get("eur")
             )
-            usd, eur = "dasdas", "dasdsa"
             if not all([usd, eur]):
                 usd_data, eur_data = await asyncio.gather(
                     self.__fetch_rate("USD"), self.__fetch_rate("EUR")
@@ -65,12 +64,15 @@ class GetCurrenciesService:
                 parsed_eur = self.__parsing(eur_data)
 
                 if parsed_usd is None or parsed_eur is None:
+                    await asyncio.gather(
+                        self.redis.setex("usd", all_settings.redis.cache_time, str(parsed_usd)),
+                        self.redis.setex("eur", all_settings.redis.cache_time, str(parsed_eur)),
+                    )
                     return {"usd": parsed_usd, "eur": parsed_eur}
                 await asyncio.gather(
-                    self.redis.setex("usd", all_settings.redis.cache_time, parsed_usd),
-                    self.redis.setex("eur", all_settings.redis.cache_time, parsed_eur),
+                    self.redis.setex("usd", all_settings.redis.cache_time, str(parsed_usd)),
+                    self.redis.setex("eur", all_settings.redis.cache_time, str(parsed_eur)),
                 )
-
                 return {"usd": parsed_usd, "eur": parsed_eur}
             return {"usd": usd, "eur": eur}
         except redis.RedisError as e:
@@ -99,9 +101,6 @@ class CachedBillsService:
             GetBill.model_validate_json(bill_data)
             for bill_data in cached_bills.values()
         ]
-
-    async def take_cache(self, user_id: UUID4):
-        pass
 
     async def caching(self, user_id: UUID4, user_bills: list[GetBill]) -> None:
         bills_data = {str(bill.uuid): bill.model_dump_json() for bill in user_bills}

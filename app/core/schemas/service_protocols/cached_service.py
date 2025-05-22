@@ -34,10 +34,6 @@ class CachedBillsServiceProtocol(Protocol):
         """Check cached bills"""
         pass
 
-    async def take_cache(self, user_id: UUID4):
-        """Get cached bills"""
-        pass
-
     async def caching(self, user_id: UUID4, user_bills: list[GetBill]) -> None:
         """Caching bills"""
         pass
