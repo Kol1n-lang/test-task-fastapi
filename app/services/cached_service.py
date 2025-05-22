@@ -65,13 +65,21 @@ class GetCurrenciesService:
 
                 if parsed_usd is None or parsed_eur is None:
                     await asyncio.gather(
-                        self.redis.setex("usd", all_settings.redis.cache_time, str(parsed_usd)),
-                        self.redis.setex("eur", all_settings.redis.cache_time, str(parsed_eur)),
+                        self.redis.setex(
+                            "usd", all_settings.redis.cache_time, str(parsed_usd)
+                        ),
+                        self.redis.setex(
+                            "eur", all_settings.redis.cache_time, str(parsed_eur)
+                        ),
                     )
                     return {"usd": parsed_usd, "eur": parsed_eur}
                 await asyncio.gather(
-                    self.redis.setex("usd", all_settings.redis.cache_time, str(parsed_usd)),
-                    self.redis.setex("eur", all_settings.redis.cache_time, str(parsed_eur)),
+                    self.redis.setex(
+                        "usd", all_settings.redis.cache_time, str(parsed_usd)
+                    ),
+                    self.redis.setex(
+                        "eur", all_settings.redis.cache_time, str(parsed_eur)
+                    ),
                 )
                 return {"usd": parsed_usd, "eur": parsed_eur}
             return {"usd": usd, "eur": eur}

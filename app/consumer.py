@@ -2,7 +2,7 @@ from email.message import EmailMessage
 
 from aiosmtplib import SMTP
 
-from core.configs import all_settings
+from app.core.configs import all_settings
 from faststream import FastStream
 from faststream.rabbit import RabbitBroker
 
