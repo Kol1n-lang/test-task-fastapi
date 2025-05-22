@@ -39,6 +39,8 @@ async def login(
     return await login_user_service(login_user)
 
 
-@auth_router.get(path="/hello")
+@auth_router.get(
+    path="/hello",
+)
 async def hello():
     return {"hello": "world"}

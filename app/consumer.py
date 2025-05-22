@@ -11,9 +11,7 @@ app = FastStream(broker)
 
 
 @broker.subscriber("bank-transactions")
-async def handle_prediction(
-        user: dict
-):
+async def handle_prediction(user: dict):
     print("Новая транзакция")
     await send_email(to_mail=user["user_email"], amount=user["amount"])
 
@@ -27,10 +25,11 @@ async def send_email(to_mail: str, amount: float):
     message["Subject"] = "Новая транзкция"
     message.set_content(f"{amount}")
     async with SMTP(
-            hostname="smtp.gmail.com",
-            port=465,
-            use_tls=True,
-            username=sender_email,
-            password=sender_password,
+        hostname="smtp.gmail.com",
+        port=465,
+        use_tls=True,
+        username=sender_email,
+        password=sender_password,
     ) as smtp:
+        print("Sending")
         await smtp.send_message(message)

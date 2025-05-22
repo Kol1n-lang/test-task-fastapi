@@ -3,8 +3,10 @@ import httpx
 import redis.asyncio as redis
 from typing import Dict, Any, Optional
 from fastapi import HTTPException
+from pydantic import UUID4
 
 from app.core.configs import all_settings
+from app.core.models.pydantic_models import GetBill
 
 
 class GetCurrenciesService:
@@ -54,27 +56,61 @@ class GetCurrenciesService:
             usd, eur = await asyncio.gather(
                 self.redis.get("usd"), self.redis.get("eur")
             )
-
             if not all([usd, eur]):
                 usd_data, eur_data = await asyncio.gather(
                     self.__fetch_rate("USD"), self.__fetch_rate("EUR")
                 )
-
                 parsed_usd = self.__parsing(usd_data)
                 parsed_eur = self.__parsing(eur_data)
 
                 if parsed_usd is None or parsed_eur is None:
+                    await asyncio.gather(
+                        self.redis.setex(
+                            "usd", all_settings.redis.cache_time, str(parsed_usd)
+                        ),
+                        self.redis.setex(
+                            "eur", all_settings.redis.cache_time, str(parsed_eur)
+                        ),
+                    )
                     return {"usd": parsed_usd, "eur": parsed_eur}
                 await asyncio.gather(
-                    self.redis.setex("usd", all_settings.redis.cache_time, parsed_usd),
-                    self.redis.setex("eur", all_settings.redis.cache_time, parsed_eur),
+                    self.redis.setex(
+                        "usd", all_settings.redis.cache_time, str(parsed_usd)
+                    ),
+                    self.redis.setex(
+                        "eur", all_settings.redis.cache_time, str(parsed_eur)
+                    ),
                 )
-
                 return {"usd": parsed_usd, "eur": parsed_eur}
-
             return {"usd": usd, "eur": eur}
         except redis.RedisError as e:
             raise HTTPException(status_code=500, detail=f"Redis error: {str(e)}")
 
     async def __call__(self) -> dict:
         return await self.__caching()
+
+
+class CachedBillsService:
+
+    def __init__(self):
+        self.redis = redis.Redis(
+            host=all_settings.redis.host,
+            port=all_settings.redis.port,
+            db=all_settings.redis.db,
+            decode_responses=True,
+        )
+
+    async def __call__(self, user_id: UUID4) -> list[GetBill] | None:
+
+        cached_bills = await self.redis.hgetall(str(user_id))
+        if not cached_bills:
+            return None
+        return [
+            GetBill.model_validate_json(bill_data)
+            for bill_data in cached_bills.values()
+        ]
+
+    async def caching(self, user_id: UUID4, user_bills: list[GetBill]) -> None:
+        bills_data = {str(bill.uuid): bill.model_dump_json() for bill in user_bills}
+        await self.redis.hset(str(user_id), mapping=bills_data)
+        await self.redis.expire(str(user_id), 10)

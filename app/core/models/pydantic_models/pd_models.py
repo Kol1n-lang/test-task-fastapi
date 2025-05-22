@@ -5,8 +5,8 @@ class RegisterUser(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     username: str = Field(..., description="Username")
-    password: str = Field(..., description="Password")
     email: EmailStr = Field(..., description="Email address")
+    password: str = Field(..., description="Password")
 
 
 class LoginUser(BaseModel):

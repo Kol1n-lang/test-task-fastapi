@@ -3,7 +3,6 @@ from sqlalchemy import select, insert, and_, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.core.models.pydantic_models import GetBill
 from app.core.models.sqlalchemy_models import Bill, User, BillTransaction
 
 
@@ -12,7 +11,7 @@ class BankRepo:
     def __init__(self, con: AsyncSession):
         self._con = con
 
-    async def get_user_id(self, username, email) -> UUID4:
+    async def get_user_id(self, email: str, username: str) -> UUID4:
         query = select(User).where(and_(User.username == username, User.email == email))
         query_res = (await self._con.execute(query)).scalar_one()
         return query_res.id

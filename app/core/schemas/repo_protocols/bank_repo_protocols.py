@@ -1,7 +1,7 @@
 from typing import Protocol
 from pydantic import UUID4
 
-from app.core.models.sqlalchemy_models import Bill, BillTransaction
+from app.core.models.sqlalchemy_models import Bill
 
 
 class BankRepoProtocol(Protocol):
@@ -26,8 +26,6 @@ class BankRepoProtocol(Protocol):
         """Del money in bill"""
         pass
 
-    async def create_transaction(
-        self, bill_id: UUID4, amount: float
-    ) -> BillTransaction:
+    async def create_transaction(self, bill_id: UUID4, amount: float) -> None:
         """Create transaction in database"""
         pass

@@ -14,8 +14,12 @@ class AuthRepoProtocol(Protocol):
         """Check user already exists in Database"""
         pass
 
-    def _hash_password(self, password: str) -> bytes:
+    async def _hash_password(self, password: str) -> bytes:
         """Hash password"""
+        pass
+
+    async def _check_password(self, password: str, hashed_password: bytes) -> bool:
+        """Check password against hashed password"""
         pass
 
     async def check_user(self, email: EmailStr, password: str) -> bool:
